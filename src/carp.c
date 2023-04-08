@@ -47,6 +47,8 @@
 #ifdef WITH_DMALLOC
 # include <dmalloc.h>
 #endif
+#include <sys/types.h>
+#include <unistd.h>
 
 static void carp_set_state(struct carp_softc *sc, int state)
 {
@@ -55,15 +57,18 @@ static void carp_set_state(struct carp_softc *sc, int state)
     }
     switch (state) {
     case INIT:
+        setproctitle("[%s / %s] initializing", interface, vaddr_arg);
         logfile(LOG_INFO, _("Switching to state: INIT"));
         break;
     case BACKUP:
+        setproctitle("[%s / %s] backup", interface, vaddr_arg);
         logfile(LOG_WARNING, _("Switching to state: BACKUP"));
         if ((sc->sc_state != INIT) || (neutral != 1)) {
             (void) spawn_handler(dev_desc_fd, downscript);
         }
         break;
     case MASTER:
+        setproctitle("[%s / %s] master", interface, vaddr_arg);
         logfile(LOG_WARNING, _("Switching to state: MASTER"));
         (void) spawn_handler(dev_desc_fd, upscript);
         gratuitous_arp(dev_desc_fd);

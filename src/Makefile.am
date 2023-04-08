@@ -36,5 +36,5 @@ ucarp_SOURCES = \
 	syslognames.h
 
 ucarp_LDADD = \
-	$(LTLIBINTL)
+	$(LTLIBINTL) -lbsd
 

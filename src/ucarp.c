@@ -18,6 +18,8 @@
 #ifdef WITH_DMALLOC
 # include <dmalloc.h>
 #endif
+#include <sys/types.h>
+#include <unistd.h>
 
 static void usage(void)
 {
@@ -85,10 +87,13 @@ static void die_mem(void)
     exit(EXIT_FAILURE);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[], char* envp[])
 {
     int option_index = 0;
     int fodder;
+
+    setproctitle_init(argc, argv, envp);
+    setproctitle("starting up");
 
 #ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
