@@ -236,7 +236,11 @@ static void carp_send_ad(struct carp_softc *sc)
     ip.ip_p = IPPROTO_CARP;
     ip.ip_sum = 0;
 
-    memcpy(&ip.ip_src, &srcip, sizeof ip.ip_src);
+    if (srcip.s_addr) {
+        memcpy(&ip.ip_src, &srcip, sizeof ip.ip_src);
+    } else {
+        memcpy(&ip.ip_src, &vaddr, sizeof ip.ip_src);
+    }
     memcpy(&ip.ip_dst.s_addr, &mcastip, sizeof ip.ip_dst.s_addr);
 
     carp_prepare_ad(&ch, sc);
@@ -431,9 +435,13 @@ static void packethandler(unsigned char *dummy,
     sp += sizeof etherhead;
     caplen = header->caplen - sizeof etherhead;
     memcpy(&iphead, sp, sizeof iphead);
+
+    // This happens only when s_addr is set.
+    // If not, we check for the skews and bases later
     if (iphead.ip_src.s_addr == srcip.s_addr) {
         return;
     }
+
     ip_len = iphead.ip_hl << 2;
     source = ntohl(iphead.ip_src.s_addr);
     dest = ntohl(iphead.ip_dst.s_addr);
@@ -452,6 +460,14 @@ static void packethandler(unsigned char *dummy,
                 source >> 8 & 0xff, source & 0xff,
                 dest >> 24 & 0xff, dest >> 16 & 0xff,
                 dest >> 8 & 0xff, dest & 0xff);
+
+        // when source ip is not set, the only way to determine
+        // our own packets is looking into adv* settings which
+        // must be different
+        if (!srcip.s_addr && ch.carp_advbase == advbase && ch.carp_advskew == advskew) {
+            return;
+        }
+
         if (caplen < ip_len + sizeof ch) {
             logfile(LOG_DEBUG,
                     "Bogus size: caplen=[%u], ip_len=[%u] ch_len=[%u]",
@@ -650,14 +666,19 @@ static RETSIGTYPE sighandler_usr(const int sig)
 static char *build_bpf_rule(void)
 {
     static char rule[256];
-    const char *srcip_s;
 
-    if ((srcip_s = inet_ntoa(srcip)) == NULL) {
-        logfile(LOG_ERR, "inet_ntoa: [%s]", strerror(errno));
-        return NULL;
+    if (srcip.s_addr) {
+        const char *srcip_s;
+        if ((srcip_s = inet_ntoa(srcip)) == NULL) {
+            logfile(LOG_ERR, "inet_ntoa: [%s]", strerror(errno));
+            return NULL;
+        }
+        snprintf(rule, sizeof rule, "proto %u and src host not %s",
+                 (unsigned int) IPPROTO_CARP, srcip_s);
+    } else {
+        snprintf(rule, sizeof rule, "proto %u", (unsigned int) IPPROTO_CARP);
     }
-    snprintf(rule, sizeof rule, "proto %u and src host not %s",
-             (unsigned int) IPPROTO_CARP, srcip_s);
+
     logfile(LOG_DEBUG, "BPF rule: [%s]", rule);
 
     return rule;
@@ -713,7 +734,7 @@ int docarp(void)
             (unsigned int) hwaddr[0], (unsigned int) hwaddr[1],
             (unsigned int) hwaddr[2], (unsigned int) hwaddr[3],
             (unsigned int) hwaddr[4], (unsigned int) hwaddr[5]);
-    if ((dev_desc = pcap_open_live(interface, ETHERNET_MTU, 0,
+    if ((dev_desc = pcap_open_live(interface, ETHERNET_MTU, srcip.s_addr ? 0 : 1,
                                    CAPTURE_TIMEOUT, errbuf)) == NULL) {
         logfile(LOG_ERR, _("Unable to open interface [%s]: %s"),
                 interface == NULL ? "-" : interface, errbuf);
@@ -793,7 +814,7 @@ int docarp(void)
         memset(&req_add, 0, sizeof req_add);
         req_add.imr_multiaddr.s_addr = mcastip.s_addr;
         req_add.imr_interface.s_addr = srcip.s_addr;
-        if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+        if (srcip.s_addr && setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
                        &req_add, sizeof req_add) < 0) {
             logfile(LOG_ERR, "Can't do IP_ADD_MEMBERSHIP errno=%s (%d)",
                     strerror(errno), errno);

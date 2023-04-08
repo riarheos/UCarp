@@ -287,10 +287,12 @@ int main(int argc, char *argv[])
         logfile(LOG_ERR, _("You must supply an advertisement time base"));
         return 1;
     }
+    /*
     if (srcip.s_addr == 0) {
         logfile(LOG_ERR, _("You must supply a persistent source address"));
         return 1;
     }
+     */
     if (vaddr.s_addr == 0) {
         logfile(LOG_ERR, _("You must supply a virtual host address"));
         return 1;
