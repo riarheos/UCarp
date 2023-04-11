@@ -1,0 +1,58 @@
+#!/bin/sh
+
+UCARP=/usr/sbin/ucarp
+EXTRA_PARAMS=""
+
+if [ ! -x $UCARP ]; then
+    exit 0
+fi
+
+if [ -z "$IF_UCARP_UPSCRIPT" ]; then
+    IF_UCARP_UPSCRIPT=/usr/share/ucarp/vip-up
+fi
+
+if [ -z "$IF_UCARP_DOWNSCRIPT" ]; then
+    IF_UCARP_DOWNSCRIPT=/usr/share/ucarp/vip-down
+fi
+
+if [ -n "$IF_UCARP_MASTER" ]; then
+    if ! expr "$IF_UCARP_MASTER" : "no\|off\|false\|0" > /dev/null; then
+        EXTRA_PARAMS="-P"
+    fi
+fi
+
+if [ -n "$IF_UCARP_ADVSKEW" ]; then
+    EXTRA_PARAMS="$EXTRA_PARAMS -k $IF_UCARP_ADVSKEW"
+fi
+
+if [ -n "$IF_UCARP_ADVBASE" ]; then
+    EXTRA_PARAMS="$EXTRA_PARAMS -b $IF_UCARP_ADVBASE"
+fi
+
+if [ -n "$IF_UCARP_DEADRATIO" ]; then
+    EXTRA_PARAMS="$EXTRA_PARAMS -r $IF_UCARP_DEADRATIO"
+fi
+
+if [ -n "$IF_UCARP_NOMCAST" ]; then
+    if ! expr "$IF_UCARP_NOMCAST" : "no\|off\|false\|0" > /dev/null; then
+        EXTRA_PARAMS="$EXTRA_PARAMS -M"
+    fi
+fi
+
+if [ -n "$IF_UCARP_XPARAM" ]; then
+    EXTRA_PARAMS="$EXTRA_PARAMS -x $IF_UCARP_XPARAM"
+fi
+
+if [ -n "$IF_ADDRESS" ]; then
+    EXTRA_PARAMS="$EXTRA_PARAMS -s $IF_ADDRESS"
+fi
+
+if [ -n "$IF_UCARP_VID" -a -n "$IF_UCARP_VIP" -a \
+        -n "$IF_UCARP_PASSWORD" ]; then
+    IP=$(echo $IF_UCARP_VIP | /usr/bin/cut -f1 -d/)
+    $UCARP -i $IFACE -B -z -v $IF_UCARP_VID \
+        -p $IF_UCARP_PASSWORD -a $IP -u $IF_UCARP_UPSCRIPT \
+        -d $IF_UCARP_DOWNSCRIPT $EXTRA_PARAMS
+fi
+
+# vi:ai sw=4 ts=4 tw=0 et

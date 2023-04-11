@@ -1,0 +1,42 @@
+ucarp for Debian
+----------------
+
+The recommended method for configuring ucarp is via 
+/etc/network/interfaces. For example:
+
+iface eth0 inet manual
+	ucarp-vid 3
+	ucarp-vip 10.0.0.1/24
+	ucarp-password 16charsatmost
+	ucarp-advskew 0
+	ucarp-advbase 1
+	ucarp-master yes
+
+In the above example, ucarp will be started when eth0 is brought up, using
+a vid of 3 and a password of 16charsatmost with a virtual IP of 10.0.0.1. 
+When ucarp determines that this host is the master eth0:ucarp will be 
+brought up - you can use the normal pre-up/up stanzas in 
+/etc/network/interfaces if you have extra things to do when the virtual 
+IP comes up.
+
+You can also override the default up/down scripts (defaults to 
+/usr/share/ucarp/vip-{down,up}) by using the ucarp-upscript and
+ucarp-downscript options. Note that you must ensure your scripts take
+care of bringing the virtual IP up and down if you do this.
+
+The full list of configurable values follows, see ucarp(8) for a
+complete description of the corresponding command arguments.
+
+config directive  | ucarp command argument  | required
+------------------+-------------------------+---------
+ucarp-vid         | -v/--vhid               | yes
+ucarp-vip         | -a/--addr               | yes
+ucarp-password    | -p/--pass               | yes
+ucarp-downscript  | -d/--downscript         | no
+ucarp-upscript    | -u/--upscript           | no
+ucarp-advskew     | -k/--advskew            | no
+ucarp-advbase     | -b/--advbase            | no
+ucarp-master      | -P/--preempt            | no
+ucarp-deadratio   | -r/--deadratio          | no
+ucarp-nomcast     | -M/--nomcast            | no
+ucarp-xparam      | -x/--xparam             | no

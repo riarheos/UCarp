@@ -1,0 +1,54 @@
+ucarp (1.5.1-1) unstable; urgency=low
+
+  This version introduces support for sending and receiving broadcast
+  advertisements, instead of multicast, through the use of the new
+  -M/--nomcast command argument.
+
+  It is also now possible to configure deadratio, xparam, and nomcast
+  from /etc/network/interfaces. See /usr/share/doc/ucarp/README.Debian
+  for a full list of configuration directives.
+
+ -- Eric Evans <eevans@debian.org>  Sat, 25 Jul 2009 11:49:21 +0000
+
+ucarp (1.5-2) unstable; urgency=low
+
+  This version introduces support for ignoring interface state
+  through the use of the -S/--ignoreifstate option. This is useful
+  when nodes are connected by a crossover cable where powering down
+  one node will drop the link of the other, causing an unwanted
+  transition to backup on the remaining node.
+
+ -- Eric Evans <eevans@debian.org>  Tue, 26 Aug 2008 16:43:06 -0500
+
+ucarp (1.5~snap080222-1) unstable; urgency=low
+
+  Ucarp supports two new arguments.
+
+  The --passfile argument can be used to specify a file containing
+  the password, (previously set by using --pass/-o). This provides
+  additional security by not exposing the password through the
+  process list. The specified file should contain the password as
+  the only line in the file.
+
+  The --xparam argument makes it possible to specify an additional
+  parameter to supply to the up/down scripts.
+
+ -- Eric Evans <eevans@debian.org>  Wed, 02 Apr 2008 21:36:04 -0500
+
+ucarp (1.2-2) unstable; urgency=low
+
+  It is now possible to configure ucarp from /etc/network/interfaces,
+  see /usr/share/doc/ucarp/README.Debian to learn how.  
+
+ -- Eric Evans <eevans@sym-link.com>  Thu, 19 Apr 2007 16:45:36 -0500
+
+ucarp (1.2-1) unstable; urgency=low
+
+  Ucarp's default behavior is to execute the command specified by 
+  the --downscript option on every transition to the "backup" state.
+  This version introduces the --neutral option that suppresses this 
+  on start up if "backup" is the initial state. It is always good 
+  practice to use an idempotent downscript, but if that is not 
+  possible then the --neutral may be of help.
+  
+ -- Eric Evans <eevans@sym-link.com>  Sun, 09 Apr 2006 16:37:41 -0500

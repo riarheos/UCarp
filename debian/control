@@ -1,0 +1,23 @@
+Source: ucarp
+Section: net
+Priority: optional
+Maintainer: Eric Evans <eevans@debian.org>
+Build-Depends: debhelper (>= 5.0.0),
+    libpcap-dev (>= 0.7.2),
+    docbook-to-man (>= 1:2.0.0),
+    autotools-dev
+Standards-Version: 3.9.5
+
+Package: ucarp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ifupdown (>= 0.7.1), net-tools, iproute2
+Description: user-space replacement to VRRP -- automatic IP fail-over
+ UCARP allows a pair of hosts to share common virtual IP addresses in 
+ order to provide automatic fail-over. It is a portable user-land 
+ implementation of the secure and patent-free Common Address Redundancy
+ Protocol (CARP, OpenBSD's alternative to the VRRP).
+ .
+ Strong points of the CARP protocol are: very low overhead, 
+ cryptographically signed messages, interoperability between different 
+ operating systems and no need for any dedicated extra network link 
+ between redundant hosts.
