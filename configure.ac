@@ -1,5 +1,6 @@
-AC_PREREQ(2.59)	
+AC_PREREQ(2.71)
 AC_INIT([ucarp],[1.5.2])
+AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_SRCDIR([src/ucarp.c])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([1.9 dist-bzip2])
@@ -18,16 +19,13 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
-AC_PROG_LIBTOOL
+LT_INIT
 
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 
 AM_GNU_GETTEXT([external])
 
 # Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([memory.h strings.h unistd.h netinet/in_systm.h])
 AC_CHECK_HEADERS([netinet/in.h stdlib.h string.h sys/socket.h sys/time.h])
@@ -48,7 +46,6 @@ dnl Check for endianness
 AC_C_BIGENDIAN
 
 dnl Check for types
-AC_TYPE_SIGNAL
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
@@ -160,7 +157,6 @@ AC_FUNC_STRFTIME
 AC_FUNC_STAT
 AC_FUNC_VPRINTF
 AC_FUNC_FORK
-AC_FUNC_WAIT3
 
 AC_CHECK_FUNCS(initgroups setrlimit waitpid setproctitle getopt_long)
 AC_CHECK_FUNCS(seteuid setreuid setresuid setegid setregid setresgid)

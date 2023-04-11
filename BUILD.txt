@@ -1,0 +1,10 @@
+ln -s /usr/share/gettext/config.rpath
+ln -s /usr/share/gettext/ABOUT-NLS
+libtoolize
+aclocal
+autoconf
+autoheader
+automake --add-missing
+
+./configure
+make -C src

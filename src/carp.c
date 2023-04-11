@@ -651,12 +651,12 @@ static void packethandler(unsigned char *dummy,
     }
 }
 
-static RETSIGTYPE sighandler_exit(const int sig)
+static void sighandler_exit(const int sig)
 {
     received_signal=15;
 }
 
-static RETSIGTYPE sighandler_usr(const int sig)
+static void sighandler_usr(const int sig)
 {
     switch (sig) {
     case SIGUSR1:
